@@ -51,6 +51,7 @@ main(args) {
     // Make the directories we need first to ensure we have permissions before downloading any files
     // this decreases the chance that our script results in partial installation leaving assets behind
     const sudo_cmd = user_only_install then "" else "sudo"
+<<<<<<< Updated upstream
     
     if user_only_install {
         // Create directory for amber
@@ -98,6 +99,8 @@ main(args) {
             }
         }
     }
+=======
+>>>>>>> Stashed changes
 
     const tag = get_latest_release_tag() failed {
         echo("Failed to get the latest release tag.")
@@ -107,14 +110,73 @@ main(args) {
 
     // Set the download link
     const url = "https://github.com/amber-lang/{name}/releases/download/{tag}/amber-{os}-{arch}.tar.xz"
+    
+    if user_only_install {
+        // Create directory for amber
+        silent dir_create(place) failed {
+            echo("Failed to create directory for amber.")
+            echo("Please make sure that root user can access {place} directory.")
+            exit(1)
+        }
+        silent dir_create(bins_folder) failed {
+            echo("Failed to create directory for amber bin at {bins_folder}.")
+            exit(1)
+        }
+        // Download amber
+        silent file_download(url, path) failed {
+            echo("Failed to download amber.")
+            echo("Something went wrong. Please try again later.")
+            exit(1)
+        }
+        // Move archived version of amber
+        mv(archive, "{place}/{archive}") failed {
+                echo("Failed to move amber to the installation directory.")
+                echo("Please make sure that root user can access {place} directory.")
+                exit(1)
+        }
+        // Unarchive amber
+        silent file_extract("{place}/{archive}", place) failed {
+            echo("Failed to unarchive amber at {place}/{archive}")
+            echo("Please make sure that you have `tar` command installed.")
+            exit(1)
+        }
 
-    // Download amber
-    silent $ curl -L -o "{archive}" "{url}" $ failed {
-        echo("Curl failed to download amber.")
-        echo("Something went wrong. Please try again later.")
-        exit(1)
+    } else {
+        sudo {
+            // Create directory for amber
+            silent dir_create(place) failed {
+                echo("Failed to create directory for amber.")
+                echo("Please make sure that your user can access {place} directory.")
+                exit(1)
+            }
+            // Download amber
+            silent file_download(url, path) failed {
+                echo("Failed to download amber.")
+                echo("Something went wrong. Please try again later.")
+                exit(1)
+            }
+            // Move archived version of amber
+            mv(archive, "{place}/{archive}") failed {
+                echo("Failed to move amber to the installation directory.")
+                echo("Please make sure that root user can access {place} directory.")
+                exit(1)
+            }
+            // Unarchive amber
+            silent file_extract("{place}/{archive}", place) failed {
+                echo("Failed to unarchive amber at {place}/{archive}")
+                echo("Please make sure that you have `tar` command installed.")
+                exit(1)
+            }
+        }
     }
 
+<<<<<<< Updated upstream
+=======
+
+
+
+
+>>>>>>> Stashed changes
     // Unarchive amber
     silent $ {sudo_cmd} tar -xvf "{place}/{archive}" -C "{place}" $ failed {
         echo("Failed to unarchive amber at {place}/{archive}")
